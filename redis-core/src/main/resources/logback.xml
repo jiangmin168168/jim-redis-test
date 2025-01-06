@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <Target>System.out</Target>
+        <encoder>
+            <pattern>%d %-5p [%t] %c - %X{X-B3-TraceId} %m%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ALL</level>
+        </filter>
+    </appender>
+    <appender name="common" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <File>${log.root}/logs/common.log</File>
+        <encoder>
+            <pattern>%d %-5p [%t] %c - %X{X-B3-TraceId} %m%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.root}/logs/common.log.%d{_yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
+    </appender>
+
+    <root level="info" additivity="false">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>
