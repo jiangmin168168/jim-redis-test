@@ -2,6 +2,7 @@ package jim.redis.core;
 
 import cn.hutool.core.lang.Assert;
 import com.google.common.base.Objects;
+import jim.redis.core.config.RedisConfig;
 import jim.redis.core.service.JedisService;
 import jim.redis.core.service.RedissonService;
 import org.openjdk.jmh.annotations.*;
@@ -16,36 +17,33 @@ import java.util.concurrent.TimeUnit;
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
 @CompilerControl(value = CompilerControl.Mode.INLINE)
 public class BenchmarkTest {
-    private static final String jedisKey = "jedisKey";
-    private static final int expireTime = 1000;
-    private static final String redissonKey = "redissonKey";
+
     static {
-        String redisHost="127.0.0.1";
-        String redisPort="6379";
-        String redisPassword="";
+        String redisHost= RedisConfig.host;
+        String redisPort=RedisConfig.port;
+        String redisPassword=RedisConfig.pwd;
         JedisService.init(redisHost, redisPort, redisPassword);
         RedissonService.init(redisHost, redisPort, redisPassword);
     }
 
     @Setup(Level.Trial)
     public void init() {
-        JedisService.set(jedisKey,"jedisValue",expireTime);
-        RedissonService.set(redissonKey,"redissonValue",expireTime);
+        JedisService.set(RedisConfig.redisKey,RedisConfig.redisValue,RedisConfig.expireTime);
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     public Object benchmarkJedis() {
-        String jedisValue = JedisService.get(jedisKey);
-        Assert.isTrue(Objects.equal(jedisValue,"jedisValue"),"jedisValue is not equal to redisValue");
+        String jedisValue = JedisService.get(RedisConfig.redisKey);
+        Assert.isTrue(Objects.equal(jedisValue,RedisConfig.redisValue),"jedisValue is not equal to "+RedisConfig.redisValue);
         return jedisValue;
     }
 
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     public Object benchmarkRedisson() {
-        String redissonValue = RedissonService.get(redissonKey);
-        Assert.isTrue(Objects.equal(redissonValue,"redissonValue"),"redissonValue is not equal to redisValue");
+        String redissonValue = RedissonService.get(RedisConfig.redisKey);
+        Assert.isTrue(Objects.equal(redissonValue,RedisConfig.redisValue),"redissonValue is not equal to "+RedisConfig.redisValue);
         return redissonValue;
     }
 
@@ -58,7 +56,7 @@ public class BenchmarkTest {
                 .measurementIterations(10)
                 .measurementTime(TimeValue.seconds(2))
                 .threads(1)
-                .output("/Users/jiangmin/java/demo/jim-redis-test/redis-core/target/benchmark.log")
+                .output("benchmark.log")
                 .build();
 
         new Runner(opt).run();
